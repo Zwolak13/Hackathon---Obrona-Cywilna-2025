@@ -1,5 +1,5 @@
 import uuid
-from django.contrib.gis.db import models as gis_models
+# from django.contrib.gis.db import models as gis_models # REMOVED
 from django.db import models
 
 class Asset(models.Model):
@@ -13,7 +13,9 @@ class Asset(models.Model):
     name = models.CharField(max_length=255)
     category = models.CharField(max_length=100, blank=True) # e.g., fire extinguisher, AED
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='unknown')
-    location = gis_models.PointField(srid=4326) # SRID 4326 for WGS84
+    # location = gis_models.PointField(srid=4326) # SRID 4326 for WGS84 -- REPLACED
+    latitude = models.FloatField(null=True, blank=True) # Added
+    longitude = models.FloatField(null=True, blank=True) # Added
     owner = models.UUIDField(null=True, blank=True) # Assuming owner might be a user ID from another system or nullable
 
     def __str__(self):

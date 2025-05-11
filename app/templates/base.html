@@ -1,70 +1,113 @@
 {% load static %}
 <!DOCTYPE html>
-<html data-theme="light" lang="pl">
+<html data-theme="light" lang="en">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>
-            {% block title %}{% endblock %}
-        </title>
-        <link rel="shortcut icon"
-              type="image/png"
-              href="{% static 'img/favicon.ico' %}">
-        <!-- css -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <title>{% block title %}QR Crisis Management{% endblock %}</title>
+        <link rel="shortcut icon" type="image/png" href="{% static 'img/favicon.ico' %}">
+        
+        <!-- CSS -->
         <link href="{% static 'css/styles.css' %}" rel="stylesheet">
-        <!-- js -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        
+        <!-- JS -->
         <script src="{% static 'js/libs/theme-change.js' %}"></script>
-        <script src="https://cdn.plot.ly/plotly-2.27.0.js" charset="utf-8"></script>
-        <script src="https://kit.fontawesome.com/ca43eda49a.js"
-                crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <script src="https://kit.fontawesome.com/ca43eda49a.js" crossorigin="anonymous"></script>
         {% block head_js %}{% endblock %}
     </head>
-    <body>
-        <div class="drawer lg:drawer-open">
-            <!-- Drawer toggle for mobile -->
-            <input id="drawer-toggle" type="checkbox" class="drawer-toggle" />
-            <!-- Page content -->
-            <div class="drawer-content flex flex-col">
-                <!-- Navbar -->
-                {% include 'partials/navbar.html' %}
-                <!-- Main content area -->
-                <div class="p-6 pb-16 max-w-7xl mx-auto w-full space-y-10">
+    <body class="h-screen flex flex-col">
+        <!-- Main content area -->
+        <main class="flex-1 overflow-hidden relative">
+            <!-- Map container -->
+            <div id="map" class="w-full h-full z-0"></div>
+            
+            <!-- Top app bar -->
+            <div class="absolute top-0 left-0 right-0 bg-base-100 shadow-md z-10">
+                <div class="navbar px-4">
+                    <div class="flex-1">
+                        <h1 class="text-xl font-bold">QR Crisis Management</h1>
+                    </div>
+                    <div class="flex-none">
+                        <button class="btn btn-ghost btn-circle">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content overlay -->
+            <div class="absolute inset-0 pointer-events-none">
+                <div class="p-4 pt-20 pointer-events-auto">
                     {% block content %}{% endblock %}
                 </div>
             </div>
-            <!-- Sidebar -->
-            <div class="drawer-side z-20">
-                <label for="drawer-toggle" aria-label="close sidebar" class="drawer-overlay"></label>
-                <aside id="controlls-sidebar" class="bg-base-200 w-96 min-h-screen border-r">
-                    <div class="p-4">
-                        {% block sidebar_controlls %}{% endblock %}
-                    </div>
-                </aside>
-            </div>
-        </div>
-        <footer class="footer footer-center bg-base-300 text-base-content p-4">
-            <aside>
-                <p>Copyright © 2024 - All right reserved</p>
-            </aside>
-        </footer>
+        </main>
+
+        <!-- Bottom navigation -->
+        <nav class="btm-nav bg-base-100 border-t z-20">
+            <button class="active">
+                <i class="fas fa-map-marker-alt"></i>
+                <span class="btm-nav-label">Map</span>
+            </button>
+            <button>
+                <i class="fas fa-list"></i>
+                <span class="btm-nav-label">Assets</span>
+            </button>
+            <button>
+                <i class="fas fa-plus-circle"></i>
+                <span class="btm-nav-label">Add</span>
+            </button>
+            <button>
+                <i class="fas fa-user"></i>
+                <span class="btm-nav-label">Profile</span>
+            </button>
+        </nav>
+
+        <!-- Initialize map and Supabase -->
         <script>
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            let cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                let cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
+            // Initialize map
+            const map = L.map('map').setView([52.2297, 21.0122], 13); // Warsaw coordinates
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Initialize Supabase client
+            const supabaseUrl = '{{ SUPABASE_URL }}';
+            const supabaseKey = '{{ SUPABASE_KEY }}';
+            const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+            // Load crisis assets from Supabase
+            async function loadCrisisAssets() {
+                const { data, error } = await supabase
+                    .from('crisis_assets')
+                    .select('*');
+                
+                if (error) {
+                    console.error('Error loading assets:', error);
+                    return;
                 }
+
+                // Add markers for each asset
+                data.forEach(asset => {
+                    L.marker([asset.latitude, asset.longitude])
+                        .bindPopup(`
+                            <div class="p-2">
+                                <h3 class="font-bold">${asset.name}</h3>
+                                <p>${asset.description}</p>
+                                <p class="text-sm text-gray-600">Status: ${asset.status}</p>
+                            </div>
+                        `)
+                        .addTo(map);
+                });
             }
-        }
-        return cookieValue;
-    }
+
+            // Load assets when the page loads
+            document.addEventListener('DOMContentLoaded', loadCrisisAssets);
         </script>
-        <!-- body js-->
+
         {% block body_js %}{% endblock %}
     </body>
 </html>

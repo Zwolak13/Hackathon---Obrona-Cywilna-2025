@@ -27,7 +27,15 @@ SECRET_KEY = "django-insecure-o=^jp(yjnwj%4$ew+si%m947*kfa_r+a$-ntz3fgi052jcahcq
 
 DEBUG = bool(os.environ.get("DEBUG", default=0))
 
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost 127.0.0.1").split(" ")
+
+# Supabase configuration
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "your-supabase-url")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "your-supabase-key")
+
+# GDAL configuration - REMOVED
+# GDAL_LIBRARY_PATH = os.environ.get('GDAL_LIBRARY_PATH', '/usr/lib/libgdal.so')
+# GEOS_LIBRARY_PATH = os.environ.get('GEOS_LIBRARY_PATH', '/usr/lib/libgeos_c.so')
 
 if DEBUG:
     LOGGING = {
@@ -55,9 +63,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # "django.contrib.gis",  # REMOVED GeoDjango
     "django_browser_reload",
     "channels",
-    "playgrounds",
+    "assets",  # Add assets app
     "corsheaders",
 ]
 
@@ -105,6 +114,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "core.context_processors.supabase",  # Add Supabase context processor
             ],
         },
     },
