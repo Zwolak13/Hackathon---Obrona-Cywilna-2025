@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Map{% endblock %}
+
+{% block content %}
+<!-- Map controls overlay -->
+<div class="absolute top-4 right-4 space-y-2 z-10">
+    <div class="bg-base-100 bg-opacity-90 rounded-lg shadow-lg p-2">
+        <button class="btn btn-sm btn-circle btn-primary" onclick="map.locate({setView: true, maxZoom: 16})" title="My Location">
+            <i class="fas fa-location-arrow"></i>
+        </button>
+        <button class="btn btn-sm btn-circle btn-primary ml-2" onclick="toggleFilters()" title="Filter Options">
+            <i class="fas fa-filter"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Filters panel -->
+<div id="filters-panel" class="absolute top-16 right-4 bg-base-100 bg-opacity-90 rounded-lg shadow-lg p-4 w-64 hidden z-10 transition-all duration-300">
+    <div class="flex justify-between items-center mb-3">
+        <h3 class="font-bold">Filter Assets</h3>
+        <button class="btn btn-ghost btn-xs btn-circle" onclick="toggleFilters()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="space-y-3">
+        <div class="form-control">
+            <label class="label cursor-pointer justify-start gap-2">
+                <input type="checkbox" class="toggle toggle-sm toggle-primary" checked />
+                <span class="label-text"><i class="fas fa-hospital text-red-500 mr-1"></i> Medical</span>
+            </label>
+        </div>
+        <div class="form-control">
+            <label class="label cursor-pointer justify-start gap-2">
+                <input type="checkbox" class="toggle toggle-sm toggle-primary" checked />
+                <span class="label-text"><i class="fas fa-utensils text-green-500 mr-1"></i> Food</span>
+            </label>
+        </div>
+        <div class="form-control">
+            <label class="label cursor-pointer justify-start gap-2">
+                <input type="checkbox" class="toggle toggle-sm toggle-primary" checked />
+                <span class="label-text"><i class="fas fa-home text-blue-500 mr-1"></i> Shelter</span>
+            </label>
+        </div>
+    </div>
+</div>
+
+<!-- Legend overlay -->
+<div class="absolute bottom-20 left-4 bg-base-100 bg-opacity-90 rounded-lg shadow-lg p-3 z-10">
+    <h4 class="font-medium text-sm mb-2">Legend</h4>
+    <div class="space-y-1 text-xs">
+        <div class="flex items-center">
+            <i class="fas fa-circle text-red-500 mr-2"></i>
+            <span>Medical</span>
+        </div>
+        <div class="flex items-center">
+            <i class="fas fa-circle text-green-500 mr-2"></i>
+            <span>Food</span>
+        </div>
+        <div class="flex items-center">
+            <i class="fas fa-circle text-blue-500 mr-2"></i>
+            <span>Shelter</span>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block body_js %}
+<script>
+    function toggleFilters() {
+        const panel = document.getElementById('filters-panel');
+        panel.classList.toggle('hidden');
+    }
+</script>
+{% endblock %} 

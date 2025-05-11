@@ -11,7 +11,6 @@ services:
     container_name: deno
     tty: true
 
-
   django:
     build:
       context: ./app
@@ -27,7 +26,19 @@ services:
       - "8050:8050"
     restart: "always"
     env_file: ./.env
-
+    develop:
+      watch:
+        - action: sync
+          path: ./app
+          target: /app
+          ignore:
+            - "**/__pycache__"
+            - "*.pyc"
+        - action: rebuild
+          path: ./app/requirements.txt
+        - action: sync+restart
+          path: ./app/core/settings.py
+          target: /app/core/settings.py
 
 volumes:
   django_templates:
