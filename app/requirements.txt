@@ -12,6 +12,4 @@ django-redis
 plotly
 channels-redis
 markupsafe
-psycopg2-binary # For PostgreSQL
-dj-database-url # For parsing DB_URL
-django-htmx # For HTMX integration
+supabase
