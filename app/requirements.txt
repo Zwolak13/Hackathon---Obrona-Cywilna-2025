@@ -12,3 +12,4 @@ django-redis
 plotly
 channels-redis
 markupsafe
+supabase
