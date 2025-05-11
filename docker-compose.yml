@@ -11,7 +11,6 @@ services:
     container_name: deno
     tty: true
 
-
   django:
     build:
       context: ./app
@@ -27,7 +26,6 @@ services:
       - "8050:8050"
     restart: "always"
     env_file: ./.env
-
 
 volumes:
   django_templates:
