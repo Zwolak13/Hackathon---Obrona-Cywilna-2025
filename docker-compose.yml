@@ -1,0 +1,34 @@
+services:
+
+  deno:
+    build: ./deno
+    volumes:
+      - ./app/templates:/templates
+      - ./app/static:/static
+    env_file: ./.env
+    environment:
+      - DENO_DIR=/deno
+    container_name: deno
+    tty: true
+
+
+  django:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: django
+    volumes:
+      - type: bind
+        source: ./app
+        target: /app
+      - ./datasets:/app/datasets
+
+    ports: 
+      - "8050:8050"
+    restart: "always"
+    env_file: ./.env
+
+
+volumes:
+  django_templates:
+  django_static:
